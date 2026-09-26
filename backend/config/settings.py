@@ -152,11 +152,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# CORS Configuration
+# CORS & CSRF Configuration
+default_trusted_domains = [
+    'https://cocohotel-production.up.railway.app',
+    'https://coco-hotel.vercel.app',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+]
 
-CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
-CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS')
-CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=False)
+env_cors = env.list('CORS_ALLOWED_ORIGINS', default=[])
+CORS_ALLOWED_ORIGINS = list(dict.fromkeys(env_cors + default_trusted_domains))
+
+env_csrf = env.list('CSRF_TRUSTED_ORIGINS', default=[])
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(env_csrf + default_trusted_domains))
+
+CORS_ALLOW_ALL_ORIGINS = env.bool('CORS_ALLOW_ALL_ORIGINS', default=True)
+
 
 
 
