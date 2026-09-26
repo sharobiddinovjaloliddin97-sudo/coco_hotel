@@ -34,7 +34,7 @@ class Amenity(models.Model):
         verbose_name_plural = "Amenities"
         constraints = [
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="amenity_sort_order_gte_0"
             )
         ]
@@ -121,23 +121,23 @@ class Room(models.Model):
         verbose_name_plural = "Rooms"
         constraints = [
             CheckConstraint(
-                check=Q(price_per_night__gte=0),
+                condition=Q(price_per_night__gte=0),
                 name="room_price_gte_0"
             ),
             CheckConstraint(
-                check=Q(max_adults__gte=1),
+                condition=Q(max_adults__gte=1),
                 name="room_max_adults_gte_1"
             ),
             CheckConstraint(
-                check=Q(max_children__gte=0),
+                condition=Q(max_children__gte=0),
                 name="room_max_children_gte_0"
             ),
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="room_sort_order_gte_0"
             ),
             CheckConstraint(
-                check=Q(room_size__isnull=True) | Q(room_size__gt=0),
+                condition=Q(room_size__isnull=True) | Q(room_size__gt=0),
                 name="room_size_gt_0"
             ),
         ]
@@ -200,7 +200,7 @@ class RoomImage(models.Model):
         verbose_name_plural = "Room Images"
         constraints = [
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="room_image_sort_order_gte_0"
             ),
             UniqueConstraint(

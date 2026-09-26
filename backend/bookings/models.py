@@ -77,15 +77,15 @@ class BookingRequest(models.Model):
         verbose_name_plural = "Booking Requests"
         constraints = [
             CheckConstraint(
-                check=Q(adults__gte=1),
+                condition=Q(adults__gte=1),
                 name="booking_adults_gte_1"
             ),
             CheckConstraint(
-                check=Q(children__gte=0),
+                condition=Q(children__gte=0),
                 name="booking_children_gte_0"
             ),
             CheckConstraint(
-                check=Q(check_out__gt=F('check_in')),
+                condition=Q(check_out__gt=F('check_in')),
                 name="booking_check_out_gt_check_in"
             ),
         ]

@@ -57,21 +57,38 @@ def generate_ai_response(user_message, history=None):
             "+998 88 000-00-51 raqami orqali murojaat qilishingiz mumkin."
         )
 
-    # Format contents with chat history
+    # Sanitize and build strictly alternating contents: user -> model -> user
     contents = []
 
     if history and isinstance(history, list):
-        for item in history[-6:]:  # Keep last 6 messages for context
-            role = 'user' if item.get('sender') == 'user' else 'model'
+        clean_turns = []
+        for item in history:
             text = item.get('text', '').strip()
-            if text:
+            if not text:
+                continue
+            role = 'user' if item.get('sender') == 'user' else 'model'
+            clean_turns.append((role, text))
+
+        # Remove trailing duplicate if current user_message is already the last item
+        if clean_turns and clean_turns[-1][0] == 'user' and clean_turns[-1][1] == user_message.strip():
+            clean_turns.pop()
+
+        # Gemini requires the conversation to start with 'user', not 'model'
+        while clean_turns and clean_turns[0][0] == 'model':
+            clean_turns.pop(0)
+
+        # Merge consecutive identical roles to guarantee strict alternation
+        for role, text in clean_turns[-6:]:
+            if contents and contents[-1]['role'] == role:
+                contents[-1]['parts'][0]['text'] += f"\n{text}"
+            else:
                 contents.append({'role': role, 'parts': [{'text': text}]})
 
-    # Add current user message
-    contents.append({
-        'role': 'user',
-        'parts': [{'text': user_message}]
-    })
+    # Append current user message
+    if contents and contents[-1]['role'] == 'user':
+        contents[-1]['parts'][0]['text'] += f"\n{user_message}"
+    else:
+        contents.append({'role': 'user', 'parts': [{'text': user_message}]})
 
     payload = {
         'system_instruction': {
@@ -86,8 +103,8 @@ def generate_ai_response(user_message, history=None):
 
     data = json.dumps(payload).encode('utf-8')
 
-    # Try up to 2 times
-    for attempt in range(2):
+    # Try up to 3 times with brief backoff
+    for attempt in range(3):
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
             req = urllib.request.Request(
@@ -95,7 +112,7 @@ def generate_ai_response(user_message, history=None):
                 data=data,
                 headers={'Content-Type': 'application/json'}
             )
-            with urllib.request.urlopen(req, timeout=15) as response:
+            with urllib.request.urlopen(req, timeout=20) as response:
                 result = json.loads(response.read().decode('utf-8'))
                 candidates = result.get('candidates', [])
                 if candidates:
@@ -104,15 +121,15 @@ def generate_ai_response(user_message, history=None):
                         return parts[0].get('text', '').strip()
         except Exception as e:
             print(f"Gemini API attempt {attempt+1} failed: {e}", flush=True)
-            if attempt == 0:
+            if attempt < 2:
                 time.sleep(1)
 
     # Fallback response
     return (
-        "Coco Hotel'ga xush kelibsiz! Hozirda tizim yangilanmoqda. "
-        "Barcha xonalar narxlari va qulayliklar bo‘yicha 24/7 qabulxonamiz: "
-        "+998 88 000-00-51 yoki saytimizning 'Xonalar' bo‘limidan to‘liq ma’lumot olishingiz mumkin."
+        "Coco Hotel'ga xush kelibsiz! Barcha xonalar narxlari, bron qilish va qulayliklar bo‘yicha "
+        "24/7 qabulxonamiz: +998 88 000-00-51 yoki saytimizning 'Xonalar' bo‘limidan to‘liq ma’lumot olishingiz mumkin."
     )
+
 
 
 

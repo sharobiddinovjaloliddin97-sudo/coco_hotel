@@ -85,11 +85,11 @@ class HotelInformation(models.Model):
         verbose_name_plural = "Hotel Information"
         constraints = [
             CheckConstraint(
-                check=Q(latitude__isnull=True) | (Q(latitude__gte=-90) & Q(latitude__lte=90)),
+                condition=Q(latitude__isnull=True) | (Q(latitude__gte=-90) & Q(latitude__lte=90)),
                 name="hotel_info_latitude_valid"
             ),
             CheckConstraint(
-                check=Q(longitude__isnull=True) | (Q(longitude__gte=-180) & Q(longitude__lte=180)),
+                condition=Q(longitude__isnull=True) | (Q(longitude__gte=-180) & Q(longitude__lte=180)),
                 name="hotel_info_longitude_valid"
             ),
         ]
@@ -145,7 +145,7 @@ class Service(models.Model):
         verbose_name_plural = "Services"
         constraints = [
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="service_sort_order_gte_0"
             )
         ]
@@ -195,7 +195,7 @@ class GalleryImage(models.Model):
         verbose_name_plural = "Gallery Images"
         constraints = [
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="gallery_image_sort_order_gte_0"
             )
         ]
@@ -260,11 +260,11 @@ class Promotion(models.Model):
         verbose_name_plural = "Promotions"
         constraints = [
             CheckConstraint(
-                check=Q(sort_order__gte=0),
+                condition=Q(sort_order__gte=0),
                 name="promotion_sort_order_gte_0"
             ),
             CheckConstraint(
-                check=Q(valid_from__isnull=True) | Q(valid_until__isnull=True) | Q(valid_until__gte=F('valid_from')),
+                condition=Q(valid_from__isnull=True) | Q(valid_until__isnull=True) | Q(valid_until__gte=F('valid_from')),
                 name="promotion_valid_until_gte_valid_from"
             ),
         ]
