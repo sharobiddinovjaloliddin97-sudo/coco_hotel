@@ -30,15 +30,14 @@ DEBUG = env('DEBUG')
 if not DEBUG and (SECRET_KEY.startswith('django-insecure-') or len(SECRET_KEY) < 50):
     raise ImproperlyConfigured('Set a strong SECRET_KEY of at least 50 characters for production.')
 
-SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=not DEBUG)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_SSL_REDIRECT = env.bool('SECURE_SSL_REDIRECT', default=False)
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = env.int('SECURE_HSTS_SECONDS', default=0)
-# Enable only behind a proxy that strips client-supplied forwarding headers.
-if env.bool('TRUST_PROXY_SSL_HEADER', default=False):
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+
 
 
 # Application definition
