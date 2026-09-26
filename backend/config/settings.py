@@ -219,3 +219,7 @@ if REDIS_URL:
         'LOCATION': REDIS_URL,
         'KEY_PREFIX': 'coco-hotel',
     }}
+
+# Gemini AI API Key for Coco AI Concierge
+GEMINI_API_KEY = env('GEMINI_API_KEY', default='')
+
