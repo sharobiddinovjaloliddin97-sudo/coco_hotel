@@ -103,16 +103,18 @@ def generate_ai_response(user_message, history=None):
 
     data = json.dumps(payload).encode('utf-8')
 
-    # Try up to 3 times with brief backoff
-    for attempt in range(3):
+    # Candidate models in speed / reliability order
+    candidate_models = ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash']
+
+    for model in candidate_models:
         try:
-            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key={api_key}"
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
             req = urllib.request.Request(
                 url,
                 data=data,
                 headers={'Content-Type': 'application/json'}
             )
-            with urllib.request.urlopen(req, timeout=20) as response:
+            with urllib.request.urlopen(req, timeout=12) as response:
                 result = json.loads(response.read().decode('utf-8'))
                 candidates = result.get('candidates', [])
                 if candidates:
@@ -120,15 +122,14 @@ def generate_ai_response(user_message, history=None):
                     if parts:
                         return parts[0].get('text', '').strip()
         except Exception as e:
-            print(f"Gemini API attempt {attempt+1} failed: {e}", flush=True)
-            if attempt < 2:
-                time.sleep(1)
+            print(f"Gemini API model {model} failed: {e}", flush=True)
 
     # Fallback response
     return (
         "Coco Hotel'ga xush kelibsiz! Barcha xonalar narxlari, bron qilish va qulayliklar bo‘yicha "
         "24/7 qabulxonamiz: +998 88 000-00-51 yoki saytimizning 'Xonalar' bo‘limidan to‘liq ma’lumot olishingiz mumkin."
     )
+
 
 
 
